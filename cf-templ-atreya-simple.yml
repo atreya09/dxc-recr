@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: VPC function.
+Resources:
+  Function:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Code:
+        ZipFile: |
+          import boto3
+          
+          def handler(event, context):
+            ssm = boto3.client('ssm', region_name="us-east-2")
+            parameter = ssm.get_parameter(Name="UserName")
+            paramValue = parameter['Parameter']['Value']
+
+            s3 = boto3.client("s3")
+            response = s3.put_object(
+                  Body=paramValue,
+                  Bucket="dxc-bucket-atreya",
+                  Key=paramValue
+                  )
+            
+
+      Runtime: python3.8
+      FunctionName: exercise-lambda
+      Role: arn:aws:iam::516273583060:role/exercise-lambda-dxc
+
